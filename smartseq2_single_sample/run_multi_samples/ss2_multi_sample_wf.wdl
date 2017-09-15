@@ -1,206 +1,38 @@
-task Star {
-  File input_fastq_read1
-  File input_fastq_read2
-  File gtf
-  File star_genome
+import ss2_single_sample.wdl as singlesample
+task GatherMetricsBySample {
+  File rna_metrics_fn
+  File aln_metrics_fn
+  File insert_metrics_fn
+  File dup_metrics_fn
 
-  command {
-    tar -xvf ${star_genome}
-    STAR  --readFilesIn ${input_fastq_read1} ${input_fastq_read2} \
-      --genomeDir ./star \
-      --quantMode TranscriptomeSAM \
-      --outSAMstrandField intronMotif \
-      --genomeLoad NoSharedMemory \
-      --sjdbGTFfile ${gtf} \
-      --readFilesCommand "zcat" \
-      --twopassMode Basic \
-      --outSAMtype BAM SortedByCoordinate  \
-      --outSAMunmapped Within \
-      --limitBAMsortRAM 30000000000 
-  }
-  output {
-    File junction_table = "SJ.out.tab"
-    File output_bam = "Aligned.sortedByCoord.out.bam"
-    File output_bam_trans = "Aligned.toTranscriptome.out.bam"
-  }
-  runtime {
-    docker:"humancellatlas/star_dev:v1"
-    memory: "40 GB"
-    disks :"local-disk 100 HDD"
-  }
-}
-
-task FeatureCountsUniqueMapping {
-  File aligned_bam
-  File gtf
-  String fc_out
+  command <<<
+    mkdir gathers
+    cat ${rna_metrics_fn} |/root/google-cloud-sdk/bin/gsutil -m cp -L cp.log -I gathers/
+    cat ${rna_metrics_fn} | rev | cut -d '/' -f 1 | rev | awk '{print "gathers/" $1}' > inputs.list
+    
+    python3 <<CODE
+    for line in open('inputs.list'):
+        try:
+            fn=open(line.strip('\n'),'r')
+            print(fn.readlines())
+        except Exception as e:
+          raise e
+          print("No file found"+line)
+    CODE
+  >>>
   
-  command {
-    featureCounts -s 0 -t exon -g gene_id -p -B -C -a ${gtf} -o "${fc_out}.gene.unq.counts.txt" ${aligned_bam}
-    featureCounts -s 0 -t exon -g transcript_id -p -B -C -a ${gtf} -o "${fc_out}.transcript.unq.counts.txt" ${aligned_bam}
-    featureCounts -s 0 -t exon -g exon_id -p -B -C -a ${gtf} -o "${fc_out}.exon.unq.counts.txt" ${aligned_bam}
-  }
-  runtime {
-    docker:"humancellatlas/star_dev:v1"
-    memory: "15 GB"
-    disks: "local-disk 50 HDD"
-  }
   output {
-    File genes = "${fc_out}.gene.unq.counts.txt"
-    File exons = "${fc_out}.exon.unq.counts.txt"
-    File trans = "${fc_out}.transcript.unq.counts.txt"
-  }
-}
-
-task FeatureCountsMultiMapping {
-  File aligned_bam
-  File gtf
-  String fc_out
-
-  command {
-    featureCounts -s 0 -t exon -g gene_id -p -M -O -a ${gtf} -o "${fc_out}.gene.mult.counts.txt" ${aligned_bam}
-    featureCounts -s 0 -t exon -g transcript_id -p -M -O -a ${gtf} -o "${fc_out}.transcript.mult.counts.txt" ${aligned_bam}
-    featureCounts -s 0 -t exon -g exon_id -p -M  -O -a ${gtf} -o "${fc_out}.exon.mult.counts.txt" ${aligned_bam}
-  }
-  runtime {
-    docker: "humancellatlas/star_dev:v1"
-    memory: "15 GB"
-    disks: "local-disk 50 HDD"
-  }
-  output {
-    File genes = "${fc_out}.gene.mult.counts.txt"
-    File exons = "${fc_out}.exon.mult.counts.txt"
-    File trans = "${fc_out}.transcript.mult.counts.txt"
-  }
-}
-
-task RsemExpression {
-  File trans_aligned_bam
-  File rsem_genome
-  String rsem_out
-  
-  command {
-    tar -xvf ${rsem_genome}
-    echo "Aligning fastqs and calculating expression"
-    rsem-calculate-expression --bam --paired-end ${trans_aligned_bam} rsem/rsem_trans_index  "${rsem_out}"
-    ## parse gene expected_count out
-    cut -f 1,4,5 "${rsem_out}.genes.results" >"${rsem_out}.gene.expected_counts"
-  }
-  runtime {
-    docker: "humancellatlas/rsem"
-    memory: "10 GB"
-    disks: "local-disk 100 HDD"
-  }
-  output {
-    File rsem_gene = "${rsem_out}.genes.results"
-    File rsem_transc = "${rsem_out}.isoforms.results"
-    File rsem_gene_count = "${rsem_out}.gene.expected_counts"
-   }
-}
-
-task CollectAlignmentSummaryMetrics {
-  File aligned_bam
-  File ref_genome_fasta
-  String output_filename
-  
-  command {
-    java -Xmx10g -jar /usr/gitc/picard.jar CollectAlignmentSummaryMetrics \
-      VALIDATION_STRINGENCY=SILENT \
-      METRIC_ACCUMULATION_LEVEL=ALL_READS \
-      INPUT=${aligned_bam} \
-      OUTPUT="${output_filename}.alignment_metrics" \
-      REFERENCE_SEQUENCE=${ref_genome_fasta} \
-      ASSUME_SORTED=true
-  }
-  output {
-    File alignment_metrics = "${output_filename}.alignment_metrics"
-  }
-  runtime {
-    docker:"broadinstitute/genomes-in-the-cloud:2.3.1-1504795437"
-    memory:"10 GB"
-    disks: "local-disk 10 HDD"
-  }
-}
-
-task CollectRnaSeqMetrics {
-  File aligned_bam
-  File ref_genome_fasta
-  File rrna_interval
-  String output_filename
-  File ref_flat
-  
-  command {
-    java -Xmx10g -jar /usr/gitc/picard.jar  CollectRnaSeqMetrics \
-      VALIDATION_STRINGENCY=SILENT \
-      REF_FLAT=${ref_flat} \
-      RIBOSOMAL_INTERVALS=${rrna_interval} \
-      INPUT=${aligned_bam} \
-      OUTPUT="${output_filename}.rna_metrics" \
-      REFERENCE_SEQUENCE=${ref_genome_fasta} \
-      ASSUME_SORTED=true \
-      STRAND_SPECIFICITY=NONE
-  }
-  output {
-    File rna_metrics = "${output_filename}.rna_metrics"
-  }
-  runtime {
-    docker:"broadinstitute/genomes-in-the-cloud:2.3.1-1504795437"
-    memory:"10 GB"
-    disks: "local-disk 10 HDD"
-  }
-}
-
-task CollectDuplicationMetrics {
-  File aligned_bam
-  String output_filename
-
-  command {
-    java -Xmx10g -jar /usr/gitc/picard.jar  MarkDuplicates \
-       VALIDATION_STRINGENCY=SILENT  \
-       INPUT=${aligned_bam} \
-       OUTPUT="${output_filename}.MarkDuplicated.bam" \
-       ASSUME_SORTED=true \
-       METRICS_FILE="${output_filename}.duplicate_metrics" \
-       REMOVE_DUPLICATES=false
-  }
-  output {
-    File dedup_metrics = "${output_filename}.duplicate_metrics"
-    File dedup_bamfile = "${output_filename}.MarkDuplicated.bam"
+    File rna_metrics = write_lines(stdout())
   }
   runtime {
     docker: "broadinstitute/genomes-in-the-cloud:2.3.1-1504795437"
-    memory: "10 GB"
-    disks: "local-disk 20 HDD"
-  }
-}
-
-task CollectInsertMetrics {
-  File aligned_bam
-  String output_filename
-
-  command {
-    java -Xmx4g -jar /usr/gitc/picard.jar CollectInsertSizeMetrics \
-      INPUT=${aligned_bam} \
-      OUTPUT="${output_filename}.insert_size_metrics" \
-      HISTOGRAM_FILE="${output_filename}.insert_size_histogram.pdf" \
-  }
-  output {
-    File insert_metrics = "${output_filename}.insert_size_metrics"
-    File histogram = "${output_filename}.insert_size_histogram.pdf"
-  }
-  runtime {
-    docker: "broadinstitute/genomes-in-the-cloud:2.3.1-1504795437"
-    memory: "10 GB"
+    memory: "4 GB"
     disks: "local-disk 10 HDD"
   }
 }
 
-task CollectMetricsBySample {
-  
-}
-task GatherPicardMetrics {
+import ss2_single_sample.wdl
 
-}
 workflow Ss2RunMultiSample {
   File sra_list_file
   File gtf
@@ -213,14 +45,21 @@ workflow Ss2RunMultiSample {
   
 ## start to scatter single sample workflow by sraID
   Array[String] sraIDs=read_lines(sra_list_file)
-  
+   
   scatter(idx in range(length(sraIDs))) {
+    call singlesample.Ss2SingleSample as single_run {
+       
+    }
     call Star {
       input:
         input_fastq_read1 = sra_dir+'/'+sraIDs[idx]+"_1.fastq.gz",
         input_fastq_read2 = sra_dir+'/'+sraIDs[idx]+"_2.fastq.gz",
         gtf = gtf,
-        star_genome = star_genome
+        star_genome = star_genome,
+        sample_tag = sraIDs[idx],
+        pu_tag = sraIDs[idx],
+        lib_tag = sraIDs[idx],
+        id_tag = sraIDs[idx]
     }
    call RsemExpression {
       input:
@@ -267,6 +106,12 @@ workflow Ss2RunMultiSample {
       }
   }
 
-## start to gatther metricss
-  
+  call GatherMetricsBySample {
+    input:
+      rna_metrics_fn = CollectRnaSeqMetrics.rna_metrics,
+      aln_metrics_fn = CollectAlignmentSummaryMetrics.alignment_metrics,
+      insert_metrics_fn = CollectInsertMetrics.insert_metrics,
+      dup_metrics_fn =CollectDuplicationMetrics.dedup_metrics
+    }
+    
 }

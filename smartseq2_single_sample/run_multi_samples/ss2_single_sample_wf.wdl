@@ -3,6 +3,11 @@ task Star {
   File input_fastq_read2
   File gtf
   File star_genome
+  String sample_tag
+  String pu_tag
+  String id_tag
+  String lib_tag
+
 
   command {
     tar -xvf ${star_genome}
@@ -16,7 +21,8 @@ task Star {
       --twopassMode Basic \
       --outSAMtype BAM SortedByCoordinate  \
       --outSAMunmapped Within \
-      --limitBAMsortRAM 30000000000 
+      --limitBAMsortRAM 30000000000 \
+      --outSAMattrRGline ID:${id_tag} PL:illumina PU:${pu_tag} SM:${sample_tag} LB:${lib_tag}
   }
   output {
     File junction_table = "SJ.out.tab"
@@ -212,6 +218,10 @@ workflow Ss2RunSingleSample {
       input_fastq_read2 = fastq_read2,
       gtf = gtf,
       star_genome = star_genome
+      sample_tag = output_prefix
+      pu_tag = output_prefix
+      lib_tag =output_prefix
+      id_tag = output_prefix
   }
  
   call RsemExpression {
