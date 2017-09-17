@@ -201,6 +201,32 @@ task CollectInsertMetrics {
   }
 }
 
+task ParseMetricsToJson {
+  String output_filename
+  File rna_metrics
+  File insert_metrics
+  File aln_metrics
+  File dup_metrics
+  command{
+    crimson picard "${rna_metrics}" "${output_filename}.rna.json"
+    crimson picard "${dup_metrics}" "${output_filename}.dup.json"
+    crimson picard "${aln_metrics}" "${output_filename}.aln.json"
+    crimson picard "${insert_metrics}" "${output_filename}.insert.json"
+  }
+  
+  runtime {
+    docker: "humancellatlas/python3-crimson"
+    memory: "4 GB"
+    dicks: "local-disk 10 HDD"
+  }
+
+  output {
+    File rna_json = "${output_filename}.rna.json"
+    File dup_json = "${output_filename}.dup.json"
+    File aln_json = "${output_filename}.aln.json"
+    File insert_json = "${output_filename}.insert.json"
+  }
+}
 workflow Ss2RunSingleSample {
   File fastq_read1
   File fastq_read2
@@ -217,10 +243,10 @@ workflow Ss2RunSingleSample {
       input_fastq_read1 = fastq_read1,
       input_fastq_read2 = fastq_read2,
       gtf = gtf,
-      star_genome = star_genome
-      sample_tag = output_prefix
-      pu_tag = output_prefix
-      lib_tag =output_prefix
+      star_genome = star_genome,
+      sample_tag = output_prefix,
+      pu_tag = output_prefix,
+      lib_tag =output_prefix,
       id_tag = output_prefix
   }
  
@@ -273,16 +299,39 @@ workflow Ss2RunSingleSample {
       aligned_bam = Star.output_bam,
       output_filename = "${output_prefix}"
     }
+  
+  call ParseMetricsToJson {
+    input:
+      #input_metrics_fn = {'rna':CollectRnaSeqMetrics.rna_metrics,'aln':CollectAlignmentSummaryMetrics.alignment_metrics,'dup':CollectDuplicationMetrics.dedup_metrics,'insert':CollectInsertMetrics.insert_metrics},
+      rna_metrics = CollectRnaSeqMetrics.rna_metrics,
+      aln_metrics = CollectAlignmentSummaryMetrics.alignment_metrics,
+      insert_metrics = CollectInsertMetrics.insert_metrics,
+      dup_metrics = CollectDuplicationMetrics.dedup_metrics,
+      output_filename = "${output_prefix}"
+  }
 
   output {
-    Star.*
-    CollectRnaSeqMetrics.*
-    CollectAlignmentSummaryMetrics.*
-    CollectDuplicationMetrics.*
-    CollectInsertMetrics.*
-    RsemExpression.*
-    FeatureCountsUniqueMapping.*
-    FeatureCountsMultiMapping.*
+    File bam_file = Star.output_bam
+    File bam_trans = Star.output_bam_trans
+    File rna_metrics = CollectRnaSeqMetrics.rna_metrics
+    File aln_metrics = CollectAlignmentSummaryMetrics.alignment_metrics
+    File dedup_metrics = CollectDuplicationMetrics.dedup_metrics
+    File dedup_bam = CollectDuplicationMetrics.dedup_bamfile
+    File insert_metrics = CollectInsertMetrics.insert_metrics
+    File insert_Histogram = CollectInsertMetrics.histogram
+    File rsem_gene_results = RsemExpression.rsem_gene
+    File rsem_isoform_results = RsemExpression.rsem_transc
+    File rsem_gene_count = RsemExpression.rsem_gene_count
+    File gene_unique_counts = FeatureCountsUniqueMapping.genes
+    File exon_unique_counts = FeatureCountsUniqueMapping.exons
+    File transcript_unique_counts = FeatureCountsUniqueMapping.trans
+    File gene_multi_counts = FeatureCountsMultiMapping.genes
+    File exon_multi_counts = FeatureCountsMultiMapping.exons
+    File transcript_multi_counts = FeatureCountsMultiMapping.trans
+    File rna_json = ParseMetricsToJson.rna_json
+    File dup_json = ParseMetricsToJson.dup_json
+    File insert_json = ParseMetricsToJson.insert_json
+    File aln_json = ParseMetricsToJson.aln_json
 
   }
 }
