@@ -1,38 +1,39 @@
-import ss2_single_sample.wdl as singlesample
-task GatherMetricsBySample {
-  File rna_metrics_fn
-  File aln_metrics_fn
-  File insert_metrics_fn
-  File dup_metrics_fn
+import "ss2_single_sample_wf.wdl" as singlesample
 
+task GatherMetrcs {
+
+  Array[File]+ input_metrics_fn
+  String output_filename
+  
   command <<<
-    mkdir gathers
-    cat ${rna_metrics_fn} |/root/google-cloud-sdk/bin/gsutil -m cp -L cp.log -I gathers/
-    cat ${rna_metrics_fn} | rev | cut -d '/' -f 1 | rev | awk '{print "gathers/" $1}' > inputs.list
-    
-    python3 <<CODE
-    for line in open('inputs.list'):
-        try:
-            fn=open(line.strip('\n'),'r')
-            print(fn.readlines())
-        except Exception as e:
-          raise e
-          print("No file found"+line)
-    CODE
-  >>>
+    i=1
+    for f in ${sep=' ' input_metrics_fn};do
+      echo $f
+      if [ $i == "1" ];then
+        header=`cat $f|awk 'NR==7 {print $_}'`
+        echo "SampleID "$header > "${output_filename}_metrics"
+        i=0
+      fi
+      if [ ${output_filename} == "aln" ];then
+        newline=`cat $f|awk 'NR==10 {print $_}'`
+      else
+        newline=`cat $f|awk 'NR==8 {print $_}'`
+      fi
+      echo "${output_filename} "$newline >>"${output_filename}_metrics"
+  done
+ 
+ >>>
   
   output {
-    File rna_metrics = write_lines(stdout())
+    File merged_metrics = "${output_filename}_metrics"
   }
+
   runtime {
-    docker: "broadinstitute/genomes-in-the-cloud:2.3.1-1504795437"
+    docker: "ubuntu:latest"
     memory: "4 GB"
-    disks: "local-disk 10 HDD"
+    dicks: "local-disk 10 HDD"
   }
 }
-
-import ss2_single_sample.wdl
-
 workflow Ss2RunMultiSample {
   File sra_list_file
   File gtf
@@ -47,71 +48,28 @@ workflow Ss2RunMultiSample {
   Array[String] sraIDs=read_lines(sra_list_file)
    
   scatter(idx in range(length(sraIDs))) {
-    call singlesample.Ss2SingleSample as single_run {
-       
-    }
-    call Star {
+    call singlesample.Ss2RunSingleSample as single_run {  
       input:
-        input_fastq_read1 = sra_dir+'/'+sraIDs[idx]+"_1.fastq.gz",
-        input_fastq_read2 = sra_dir+'/'+sraIDs[idx]+"_2.fastq.gz",
+        fastq_read1 = sra_dir+'/'+sraIDs[idx]+"_1.fastq.gz",
+        fastq_read2 = sra_dir+'/'+sraIDs[idx]+"_2.fastq.gz",
         gtf = gtf,
-        star_genome = star_genome,
-        sample_tag = sraIDs[idx],
-        pu_tag = sraIDs[idx],
-        lib_tag = sraIDs[idx],
-        id_tag = sraIDs[idx]
-    }
-   call RsemExpression {
-      input:
-        trans_aligned_bam = Star.output_bam_trans,
-        rsem_genome = rsem_genome,
-        rsem_out = sraIDs[idx]
-    }
-    call FeatureCountsUniqueMapping {
-      input:
-        aligned_bam = Star.output_bam,
-        gtf = gtf,
-        fc_out = sraIDs[idx]
-    }
-    call FeatureCountsMultiMapping {
-      input:
-        aligned_bam=Star.output_bam,
-        gtf = gtf,
-        fc_out = sraIDs[idx]
-    }
-    call CollectRnaSeqMetrics {
-      input:
-        aligned_bam = Star.output_bam,
-        ref_genome_fasta = ref_fasta,
+        ref_fasta = ref_fasta,
         rrna_interval = rrna_interval,
-        output_filename = sraIDs[idx],
-        ref_flat= ref_flat
-    }
-    call CollectAlignmentSummaryMetrics {
-      input:
-        aligned_bam = Star.output_bam,
-        ref_genome_fasta = ref_fasta,
-        output_filename = sraIDs[idx]
-    }
-    call CollectDuplicationMetrics {
-      input:
-        aligned_bam = Star.output_bam,
-        output_filename = sraIDs[idx]
-    }
-
-    call CollectInsertMetrics {
-      input:
-        aligned_bam = Star.output_bam,
-        output_filename = sraIDs[idx]
-      }
-  }
-
-  call GatherMetricsBySample {
-    input:
-      rna_metrics_fn = CollectRnaSeqMetrics.rna_metrics,
-      aln_metrics_fn = CollectAlignmentSummaryMetrics.alignment_metrics,
-      insert_metrics_fn = CollectInsertMetrics.insert_metrics,
-      dup_metrics_fn =CollectDuplicationMetrics.dedup_metrics
-    }
+        ref_flat = ref_flat,
+        star_genome = star_genome,
+        rsem_genome = rsem_genome,
+        output_prefix = sraIDs[idx]
     
+    }
+ }
+
+ call GatherMetrcs as collect_rna {
+  input:
+    output_filename = 'rna',
+    input_metrics_fn = single_run.rna_metrics
+ }
+ output {
+   single_run.*
+   collect_rna.*
+  }
 }
