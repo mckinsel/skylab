@@ -201,32 +201,6 @@ task CollectInsertMetrics {
   }
 }
 
-task ParseMetricsToJson {
-  String output_filename
-  File rna_metrics
-  File insert_metrics
-  File aln_metrics
-  File dup_metrics
-  command{
-    crimson picard "${rna_metrics}" "${output_filename}.rna.json"
-    crimson picard "${dup_metrics}" "${output_filename}.dup.json"
-    crimson picard "${aln_metrics}" "${output_filename}.aln.json"
-    crimson picard "${insert_metrics}" "${output_filename}.insert.json"
-  }
-  
-  runtime {
-    docker: "humancellatlas/python3-crimson"
-    memory: "4 GB"
-    dicks: "local-disk 10 HDD"
-  }
-
-  output {
-    File rna_json = "${output_filename}.rna.json"
-    File dup_json = "${output_filename}.dup.json"
-    File aln_json = "${output_filename}.aln.json"
-    File insert_json = "${output_filename}.insert.json"
-  }
-}
 workflow Ss2RunSingleSample {
   File fastq_read1
   File fastq_read2
@@ -300,14 +274,6 @@ workflow Ss2RunSingleSample {
       output_filename = "${output_prefix}"
     }
   
-  call ParseMetricsToJson {
-    input:
-      rna_metrics = CollectRnaSeqMetrics.rna_metrics,
-      aln_metrics = CollectAlignmentSummaryMetrics.alignment_metrics,
-      insert_metrics = CollectInsertMetrics.insert_metrics,
-      dup_metrics = CollectDuplicationMetrics.dedup_metrics,
-      output_filename = "${output_prefix}"
-  }
 
   output {
     File bam_file = Star.output_bam
@@ -327,10 +293,5 @@ workflow Ss2RunSingleSample {
     File gene_multi_counts = FeatureCountsMultiMapping.genes
     File exon_multi_counts = FeatureCountsMultiMapping.exons
     File transcript_multi_counts = FeatureCountsMultiMapping.trans
-    File rna_json = ParseMetricsToJson.rna_json
-    File dup_json = ParseMetricsToJson.dup_json
-    File insert_json = ParseMetricsToJson.insert_json
-    File aln_json = ParseMetricsToJson.aln_json
-
   }
 }
