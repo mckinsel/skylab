@@ -1,6 +1,6 @@
 import "ss2_single_sample_wf.wdl" as singlesample
 
-task GatherMetrcs {
+task GatherMetrics {
 
   Array[File]+ input_metrics_fn
   String output_filename
@@ -8,7 +8,7 @@ task GatherMetrcs {
   command <<<
     i=1
     for f in ${sep=' ' input_metrics_fn};do
-      echo $f
+      sid=$(echo $f|rev| cut -d '/' -f 1 | rev |cut -d '.' -f 1)
       if [ $i == "1" ];then
         header=`cat $f|awk 'NR==7 {print $_}'`
         echo "SampleID "$header > "${output_filename}_metrics"
@@ -19,7 +19,7 @@ task GatherMetrcs {
       else
         newline=`cat $f|awk 'NR==8 {print $_}'`
       fi
-      echo "${output_filename} "$newline >>"${output_filename}_metrics"
+      echo $sid" "$newline >>"${output_filename}_metrics"
   done
  
  >>>
@@ -34,6 +34,7 @@ task GatherMetrcs {
     dicks: "local-disk 10 HDD"
   }
 }
+
 workflow Ss2RunMultiSample {
   File sra_list_file
   File gtf
@@ -63,13 +64,31 @@ workflow Ss2RunMultiSample {
     }
  }
 
- call GatherMetrcs as collect_rna {
+ call GatherMetrics as collect_rna {
   input:
     output_filename = 'rna',
     input_metrics_fn = single_run.rna_metrics
  }
+ call GatherMetrics as collect_dup {
+  input:
+    output_filename = 'dedup',
+    input_metrics_fn  = single_run.dedup_metrics
+ }
+call GatherMetrics as collect_insert {
+  input:
+    output_filename = 'insert',
+    input_metrics_fn = single_run.insert_metrics
+}
+call GatherMetrics as collect_aln {
+  input:
+    output_filename = 'aln',
+    input_metrics_fn = single_run.aln_metrics
+}
  output {
    single_run.*
    collect_rna.*
+   collect_dup.*
+   collect_insert.*
+   collect_aln.*
   }
 }

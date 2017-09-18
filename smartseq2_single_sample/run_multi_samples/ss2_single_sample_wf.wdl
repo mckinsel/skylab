@@ -302,7 +302,6 @@ workflow Ss2RunSingleSample {
   
   call ParseMetricsToJson {
     input:
-      #input_metrics_fn = {'rna':CollectRnaSeqMetrics.rna_metrics,'aln':CollectAlignmentSummaryMetrics.alignment_metrics,'dup':CollectDuplicationMetrics.dedup_metrics,'insert':CollectInsertMetrics.insert_metrics},
       rna_metrics = CollectRnaSeqMetrics.rna_metrics,
       aln_metrics = CollectAlignmentSummaryMetrics.alignment_metrics,
       insert_metrics = CollectInsertMetrics.insert_metrics,
