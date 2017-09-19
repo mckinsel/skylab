@@ -213,8 +213,6 @@ def calculate_cost(run_label,metadata, ignore_preempted, only_total_cost, print_
                 disk_info["size"], disk_gb_hours, disk_cost, failed_pe_disk_gb_hours, failed_pe_disk_cost, total_cost)
             print('\t'.join(map(str, out)))
 
-#workflow name: Ss2RunMultiSample.single_run
-#identifier name of identifier field: output_prefix
 def parse_metadata_json(jsonfile):
     with open(jsonfile) as af:
         meta=json.load(af)
@@ -247,12 +245,6 @@ def parse_metadata_json(jsonfile):
 
 def main():
     parser = argparse.ArgumentParser()
-    ##parser.add_argument("-m", "--metadata-file", dest="metadata", required=True, help="metadata file to parse individual workflow")
-    ##parser.add_argument("-w", "--workflow-name", dest="workflow", required=True, help="workflow name")
-    ##parser.add_argument("-i", "--identifier-name", dest="identifier", required=True, help="Identifier linked to each workflow")
-    ##parser.add_argument("--ignore_preempted", dest="ignore_preempted", action="store_true", help="ignore preempted tasks")
-    ##parser.add_argument("--only_total", dest="only_total_cost", action="store_true", help="print total cost of the workflow instead of the tsv per task costs")
-    ##parser.add_argument("--auth",dest="auth",required=True,help="autherization json file")
     parser.add_argument("-i","--input-json",dest="input_json_file",required=True,help="input metadata information")
     args = parser.parse_args()
     parse_metadata_json(args.input_json_file)
