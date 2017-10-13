@@ -37,9 +37,11 @@ task GetInputs {
     bundle = manifest['bundle']
     uuid_to_url = {}
     name_to_meta = {}
+    url_to_name_all = {}
     for f in bundle['files']:
         uuid_to_url[f['uuid']] = f['url']
         name_to_meta[f['name']] = f
+        url_to_name_all[f['url']] = f['name']
 
     print('Downloading assay.json')
     assay_json_uuid = name_to_meta['assay.json']['uuid']
@@ -56,6 +58,17 @@ task GetInputs {
     r1 = [name_to_meta[lane['r1']]['url'] for lane in lanes]
     r2 = [name_to_meta[lane['r2']]['url'] for lane in lanes]
     i1 = [name_to_meta[lane['i1']]['url'] for lane in lanes]
+    url_to_name = {}
+    for i in r1:
+        url_to_name[i] = url_to_name_all[i]
+    for i in r2:
+        url_to_name[i] = url_to_name_all[i]
+    for i in i1:
+        url_to_name[i] = url_to_name_all[i]
+
+    with open('lanes.txt', 'w') as f:
+        for i in range(len(lanes)):
+            f.write('{}\n'.format(i))
 
     with open('r1.tsv', 'w') as f:
         for r in r1:
@@ -66,6 +79,16 @@ task GetInputs {
     with open('i1.tsv', 'w') as f:
         for i in i1:
             f.write('{0}\n'.format(i))
+
+    with open('r1_names.tsv', 'w') as f:
+        for r in r1:
+            f.write('{0}\n'.format(url_to_name[r]))
+    with open('r2_names.tsv', 'w') as f:
+        for r in r2:
+            f.write('{0}\n'.format(url_to_name[r]))
+    with open('i1_names.tsv', 'w') as f:
+        for i in i1:
+            f.write('{0}\n'.format(url_to_name[i]))
     print('Creating input map')
     with open('inputs.tsv', 'w') as f:
         f.write('sample_id\n')
@@ -80,9 +103,112 @@ task GetInputs {
     Array[File] r1 = read_lines("r1.tsv")
     Array[File] r2 = read_lines("r2.tsv")
     Array[File] i1 = read_lines("i1.tsv")
+    Array[String] r1_names = read_lines("r1_names.tsv")
+    Array[String] r2_names = read_lines("r2_names.tsv")
+    Array[String] i1_names = read_lines("i1_names.tsv")
+    Array[Int] lanes = read_lines("lanes.txt")
     Object inputs = read_object("inputs.tsv")
   }
 }
+
+task rename_files {
+  File r1
+  File r2
+  File i1
+  String r1_name
+  String r2_name
+  String i1_name
+
+  command <<<
+    python <<CODE
+
+    import subprocess
+
+    subprocess.check_output(['mv', '${r1}', '${r1_name}'])
+    subprocess.check_output(['mv', '${r2}', '${r2_name}'])
+    subprocess.check_output(['mv', '${i1}', '${i1_name}'])
+
+    CODE
+  >>>
+  runtime {
+    docker: "humancellatlas/secondary-analysis-python"
+  }
+  output {
+    File r1_new = "${r1_name}"
+    File r2_new = "${r2_name}"
+    File i1_new = "${i1_name}"
+  }
+}
+
+task inputs_for_submit {
+  Array[String] r1
+  Array[String] r2
+  Array[String] i1
+  Array[Object] other_inputs
+  Array[Object] primers
+
+  command <<<
+    primers_file="${write_objects(primers)}"
+    mv $primers_file primers.tsv
+
+    python <<CODE
+    inputs = []
+    print('other inputs')
+    with open('${write_objects(other_inputs)}') as f:
+        keys = f.readline().strip().split('\t')
+        for line in f:
+            values = line.strip().split('\t')
+            input = {}
+            for i, key in enumerate(keys):
+                input[key] = values[i]
+            print(input)
+            inputs.append(input)
+
+    print('r1')
+    r1 = ['${sep="', '" r1}']
+    for r in r1:
+        input = {
+            'name': r.split('\t')[-1],
+            'value': r
+        }
+        inputs.append(input)
+
+    print('r2')
+    r2 = ['${sep="', '" r2}']
+    for r in r2:
+        input = {
+            'name': r.split('\t')[-1],
+            'value': r
+        }
+        inputs.append(input)
+
+    print('i1')
+    i1 = ['${sep="', '" i1}']
+    for i in i1:
+        input = {
+            'name': i.split('\t')[-1],
+            'value': i
+        }
+        inputs.append(input)
+
+    print('write inputs.tsv')
+    with open('inputs.tsv', 'w') as f:
+        f.write('name\tvalue\n')
+        for input in inputs:
+            print(input)
+            f.write('{0}\t{1}\n'.format(input['name'], input['value']))
+    print('finished')
+    CODE
+  >>>
+  runtime {
+    docker: "humancellatlas/secondary-analysis-python"
+  }
+  output {
+    File inputs = "inputs.tsv"
+    File primers_tsv = "primers.tsv"
+  }
+}
+
 
 workflow Wrapper10xCount {
   String bundle_uuid
@@ -107,7 +233,7 @@ workflow Wrapper10xCount {
   Int retry_seconds
   Int timeout_seconds
 
-  call GetInputs as prep {
+  call GetInputs {
     input:
       bundle_uuid = bundle_uuid,
       bundle_version = bundle_version,
@@ -116,13 +242,25 @@ workflow Wrapper10xCount {
       timeout_seconds = timeout_seconds
   }
 
+  scatter(i in GetInputs.lanes) {
+    call rename_files as prep {
+      input:
+        r1 = GetInputs.r1[i],
+        r2 = GetInputs.r2[i],
+        i1 = GetInputs.i1[i],
+        r1_name = GetInputs.r1_names[i],
+        r2_name = GetInputs.r2_names[i],
+        i1_name = GetInputs.i1_names[i]
+    }
+  }
+
   call countwdl.count as analysis {
     input:
       sample_def = sample_def,
-      r1 = prep.r1,
-      r2 = prep.r2,
-      i1 = prep.i1,
-      sample_id = prep.inputs.sample_id,
+      r1 = prep.r1_new,
+      r2 = prep.r2_new,
+      i1 = prep.i1_new,
+      sample_id = GetInputs.inputs.sample_id,
       reads_per_file = reads_per_file,
       subsample_rate = subsample_rate,
       primers = primers,
@@ -131,65 +269,63 @@ workflow Wrapper10xCount {
       umi_min_qual_threshold = umi_min_qual_threshold
   }
 
-  call submit_wdl.submit {
+  String sample_id = GetInputs.inputs.sample_id
+  File primers_tsv = inputs_for_submit.primers_tsv
+
+  call inputs_for_submit {
     input:
-      inputs = [
+      r1 = GetInputs.r1,
+      r2 = GetInputs.r2,
+      i1 = GetInputs.i1,
+      primers = primers,
+      other_inputs = [
         {
           'name': 'sample_def',
-          'value': sample_def,
-        },
-        {
-          'name': 'r1',
-          'value': prep.inputs.r1,
-        },
-        {
-          'name': 'r2',
-          'value': prep.inputs.r2,
-        },
-        {
-          'name': 'i1',
-          'value': prep.inputs.i1,
+          'value': sample_def
         },
         {
           'name': 'sample_id',
-          'value': prep.inputs.sample_id,
+          'value': sample_id
         },
         {
           'name': 'reads_per_file',
-          'value': reads_per_file,
+          'value': reads_per_file
         },
         {
           'name': 'subsample_rate',
-          'value': subsample_rate,
-        },
-        {
-          'name': 'primers',
-          'value': primers,
+          'value': subsample_rate
         },
         {
           'name': 'align',
-          'value': align,
+          'value': align
         },
         {
           'name': 'reference_path',
-          'value': reference_path,
+          'value': reference_path
         },
         {
           'name': 'umi_min_qual_threshold',
-          'value': umi_min_qual_threshold,
+          'value': umi_min_qual_threshold
         }
-      ],
+      ]
+  }
+
+  Array[Object] inputs = read_objects(inputs_for_submit.inputs)
+
+  call submit_wdl.submit {
+    input:
+      inputs = inputs,
       outputs = [
-        analysis.attach_bcs_and_umis_summary,
-        analysis.filter_barcodes.summary,
-        analysis.count_genes_join.reporter_summary,
-        analysis.extract_reads_join.summary,
-        analysis.mark_duplicates_join.summary,
-        analysis.count_genes_join.matrices_mex,
-        analysis.count_genes_join.matrices_h5,
-        analysis.filter_barcodes.filtered_matrices_mex,
-        analysis.filter_barcodes.filtered_matrices_h5,
-        analysis.sort_by_bc_join.default
+#        analysis.attach_bcs_and_umis_summary,
+#        analysis.filter_barcodes_summary,
+        analysis.count_genes_summary,
+#        analysis.extract_reads_summary,
+#        analysis.mark_duplicates_summary,
+        analysis.raw_gene_bc_matrices_mex,
+        analysis.raw_gene_bc_matrices_h5,
+        analysis.filtered_gene_bc_matrices_mex,
+        analysis.filtered_gene_bc_matrices_h5,
+        analysis.bam_output
       ],
       format_map = format_map,
       submit_url = submit_url,
