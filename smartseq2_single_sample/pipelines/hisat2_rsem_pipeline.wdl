@@ -31,11 +31,9 @@ workflow RunHisat2RsemPipeline {
     File logfile = Hisat2Trans.logfile
     File rsem_gene_results = Rsem.rsem_gene
     File rsem_isoform_results = Rsem.rsem_isoform
-    File rsem_gene_counts = Rsem.rsem_gene_count
     File rsem_time_log = Rsem.rsem_time
     File rsem_cnt_log = Rsem.rsem_cnt
     File rsem_model_log = Rsem.rsem_model
     File rsem_theta_log = Rsem.rsem_theta
-    
   }
 }

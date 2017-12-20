@@ -16,7 +16,8 @@ task HISAT2PE {
       --rg PL:ILLUMINA --rg PU:${sample_name} \
       --new-summary --summary-file ${output_name}.log \
       --met-file ${output_name}.hisat2.met.txt --met 5 \
-      -p 4 -S ${output_name}.sam
+      --seed 12345 \
+      -p 4 -S ${output_name}.sam 
     samtools sort -@ 4 -O bam -o "${output_name}.bam" "${output_name}.sam" 
   }
   runtime {
@@ -53,6 +54,9 @@ task HISAT2rsem {
       --new-summary --summary-file ${output_name}.log \
       --met-file ${output_name}.hisat2.met.txt --met 5 \
       -k 10 \
+      --mp 1,1 \
+      --np 1 \
+      --score-min L,0,-0.1 \
       --secondary \
       --no-mixed \
       --no-softclip \
@@ -60,6 +64,7 @@ task HISAT2rsem {
       --rdg 99999999,99999999 \
       --rfg 99999999,99999999 \
       --no-spliced-alignment \
+      --seed 12345 \
       -p 4 -S ${output_name}.sam 
     samtools view -bS "${output_name}.sam" >"${output_name}.bam"
   }
@@ -91,6 +96,7 @@ task HISAT2SE {
       --rg PL:ILLUMINA --rg PU:${sample_name} \
       --new-summary --summary-file "${output_name}.log" \
       --met-file ${output_name}.hisat2.met.txt --met 5 \
+      --seed 12345 \
       -p 4 -S ${output_name}.sam
       samtools sort -@ 4 -O bam -o "${output_name}.bam" "${output_name}.sam"
   }

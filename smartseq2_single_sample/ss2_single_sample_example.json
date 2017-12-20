@@ -1,11 +1,17 @@
 {
-  "Ss2RsemSingleSample.output_prefix": "SRR1294876",  
-  "Ss2RsemSingleSample.fastq_read1": "gs://broad-dsde-mint-dev-teststorage/patel_ap/SRR1294876_1.fastq.gz",  
-  "Ss2RsemSingleSample.fastq_read2": "gs://broad-dsde-mint-dev-teststorage/patel_ap/SRR1294876_2.fastq.gz",
-  "Ss2RsemSingleSample.gtf": "gs://broad-dsde-mint-dev-teststorage/reference/hg19/gencode.v19.annotation.gtf",
-  "Ss2RsemSingleSample.ref_fasta": "gs://broad-dsde-mint-dev-teststorage/reference/hg19/Homo_sapiens_assembly19.fasta",
-  "Ss2RsemSingleSample.ref_flat": "gs://broad-dsde-mint-dev-teststorage/reference/hg19/Homo_sapiens_assembly19.refFlat",
-  "Ss2RsemSingleSample.rrna_interval": "gs://broad-dsde-mint-dev-teststorage/reference/hg19/Homo_sapiens_assembly19.rRNA.interval_list",
-  "Ss2RsemSingleSample.star_genome": "gs://broad-dsde-mint-dev-teststorage/reference/hg19/star.tar",
-  "Ss2RsemSingleSample.rsem_genome": "gs://broad-dsde-mint-dev-teststorage/reference/hg19/rsem.tar"
+  "run_pipeline.gtffile": "gs://broad-dsde-mint-dev-teststorage/reference/GRCh38_Gencode/gencode.v27.primary_assembly.annotation.gtf",
+  "run_pipeline.hisat2_ref_trans_name": "gencode_v27_trans_rsem",
+  "run_pipeline.rrna_intervals": "gs://broad-dsde-mint-dev-teststorage/reference/gencode.v27.rRNA.interval_list",
+  "run_pipeline.star_ref_index": "gs://broad-dsde-mint-dev-teststorage/reference/GRCh38_Gencode/GRCh38_GencodeV27_Primary.tar",
+  "run_pipeline.hisat2_ref_index": "gs://broad-dsde-mint-dev-teststorage/reference/HISAT2/genome_snp_tran.tar.gz",
+  "run_pipeline.genome_ref_fasta": "gs://broad-dsde-mint-dev-teststorage/reference/GRCh38_Gencode/GRCh38.primary_assembly.genome.fa",
+  "run_pipeline.hisat2_ref_trans_index": "gs://broad-dsde-mint-dev-teststorage/reference/HISAT2/gencode_v27_trans_rsem.tar.gz",
+  "run_pipeline.rsem_ref_index": "gs://broad-dsde-mint-dev-teststorage/reference/rsem_ref/gencode_v27_primary.tar",
+  "run_pipeline.gene_ref_flat": "gs://broad-dsde-mint-dev-teststorage/reference/GRCh38_gencode.v27.refFlat.txt",
+  "run_pipeline.hisat2_ref_name": "genome_snp_tran",
+  "run_pipeline.stranded":"NONE",
+  "run_pipeline.fastq1":"gs://broad-dsde-mint-dev-teststorage/patel_ap/SRR1294925_1.fastq.gz",
+  "run_pipeline.fastq2":"gs://broad-dsde-mint-dev-teststorage/patel_ap/SRR1294925_2.fastq.gz",
+	"run_pipeline.sample_name":"SRR1294925",
+	"run_pipeline.output_name":"SRR1294925"
 }

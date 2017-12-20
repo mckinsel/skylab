@@ -81,7 +81,7 @@ task CollectDuplicationMetrics {
   String output_filename
 
   command {
-    java -Xmx6g -jar /usr/picard/picard.jar  MarkDuplicates \
+    java -Xmx6g -XX:ParallelGCThreads=2 -jar /usr/picard/picard.jar  MarkDuplicates \
        VALIDATION_STRINGENCY=SILENT  \
        INPUT=${aligned_bam} \
        OUTPUT="${output_filename}.MarkDuplicated.bam" \
@@ -92,6 +92,7 @@ task CollectDuplicationMetrics {
   runtime {
     docker: "quay.io/humancellatlas/secondary-analysis-picard:2.10.10-7ab16db"
     memory: "7.5 GB"
+    cpu: "2"
     disks: "local-disk 50 HDD"
   }
   output {
