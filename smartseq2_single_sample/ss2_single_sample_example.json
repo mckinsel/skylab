@@ -12,6 +12,6 @@
   "run_pipeline.stranded":"NONE",
   "run_pipeline.fastq1":"gs://broad-dsde-mint-dev-teststorage/patel_ap/SRR1294925_1.fastq.gz",
   "run_pipeline.fastq2":"gs://broad-dsde-mint-dev-teststorage/patel_ap/SRR1294925_2.fastq.gz",
-	"run_pipeline.sample_name":"SRR1294925",
-	"run_pipeline.output_name":"SRR1294925"
+  "run_pipeline.sample_name":"SRR1294925",
+  "run_pipeline.output_name":"SRR1294925"
 }

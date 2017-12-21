@@ -6,7 +6,7 @@ task RsemExpression {
   command {
     tar -xvf ${rsem_genome}
     echo "Aligning fastqs and calculating expression"
-    rsem-calculate-expression --bam --paired-end ${trans_aligned_bam} rsem/rsem_trans_index  "${rsem_out}" -p 4 --calc-pme --single-cell-prior --time --seed 12345
+    rsem-calculate-expression --bam --paired-end ${trans_aligned_bam} rsem/rsem_trans_index  "${rsem_out}" -p 4 --calc-pme --single-cell-prior --time --seed 555
     ## parse gene expected_count out
     ## cut -f 1,4,5 "${rsem_out}.genes.results" >"${rsem_out}.gene.expected_counts"
   }

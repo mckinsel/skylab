@@ -17,6 +17,8 @@ task HISAT2PE {
       --new-summary --summary-file ${output_name}.log \
       --met-file ${output_name}.hisat2.met.txt --met 5 \
       --seed 12345 \
+      -k 10 \
+      --secondary \
       -p 4 -S ${output_name}.sam 
     samtools sort -@ 4 -O bam -o "${output_name}.bam" "${output_name}.sam" 
   }
@@ -66,7 +68,7 @@ task HISAT2rsem {
       --no-spliced-alignment \
       --seed 12345 \
       -p 4 -S ${output_name}.sam 
-    samtools view -bS "${output_name}.sam" >"${output_name}.bam"
+    samtools view -bS  "${output_name}.sam" >"${output_name}.bam"
   }
   runtime {
     docker:"quay.io/humancellatlas/secondary-analysis-hisat2:2-2.1.0"
