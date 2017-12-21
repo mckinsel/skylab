@@ -1,6 +1,8 @@
 import "hisat2.wdl" as hisat2
 import "picard.wdl" as picard
-
+## QC pipeline
+## HISAT2 as aligner to align reads to genome reference 
+## Picard will produce a set of QC metricss
 workflow RunHisat2Pipeline {
   File fastq_read1
   File fastq_read2

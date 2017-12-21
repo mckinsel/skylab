@@ -1,5 +1,8 @@
 import "hisat2_QC_pipeline.wdl" as run_hisat2
 import "hisat2_rsem_pipeline.wdl" as run_hisat2_rsem
+## main pipeline:
+## QC pipeline: HISAT2+Picard on genome alignments
+## quantification pipeline: HISAT2+RSEM on transcriptome alignments
 
 workflow run_pipeline {
 

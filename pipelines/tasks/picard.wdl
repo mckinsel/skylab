@@ -75,13 +75,14 @@ task CollectRnaMetrics {
     File rna_coverage = "${output_filename}.rna.coverage.pdf"
   }
 }
-
+## Here are use  -XX:ParallelGCThreads=2 to run MarkDuplication on mutlple
+## thread. 
 task CollectDuplicationMetrics {
   File aligned_bam
   String output_filename
 
   command {
-    java -Xmx6g -XX:ParallelGCThreads=2 -jar /usr/picard/picard.jar  MarkDuplicates \
+    java -Xmx6g -XX:ParallelGCThreads=2  -jar /usr/picard/picard.jar  MarkDuplicates \
        VALIDATION_STRINGENCY=SILENT  \
        INPUT=${aligned_bam} \
        OUTPUT="${output_filename}.MarkDuplicated.bam" \

@@ -1,4 +1,8 @@
 ## paired-end alignment
+## run HISAT2 to genome reference with dedault parameters
+## --seed to fix pseudo-random number and in order to produce deterministics results
+## -k --secondary to output multiple mapping reads. --keep 10 will output  up to 10 multiple mapping reads
+## which actually is default
 task HISAT2PE {
   File hisat2_ref
   File fq1
@@ -36,8 +40,12 @@ task HISAT2PE {
 }
 ## run hisat2 for rsem
 ## increase gap alignment penalty to avoid gap alignment
-## --mp 1,1 --np 1 --score-min L,0,-0.1 is default paramesters when rsem runs alignment by using bowtie2
-## no-splice-alignment otherwise rsem will report partial alignment error.
+## --mp 1,1 --np 1 --score-min L,0,-0.1 is default paramesters when rsem runs alignment by using bowtie2/Bowtie
+## --mp 1,1 and --np 1 will reduce mismatching penalty to 1 for all.
+## with no-splice-alignment no-softclip no-mixed options on, HISAT2 will onlu output concordance alignment
+## --rdg 99999999,99999999 and --rfg 99999999,99999999 will give an infinity penalty to alignment with indel.As results
+## no indel/gaps in alignments
+ 
 task HISAT2rsem {
   File hisat2_ref
   File fq1

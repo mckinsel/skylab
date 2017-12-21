@@ -1,6 +1,11 @@
 import "hisat2.wdl" as hisat2
 import "rsem.wdl" as rsem
-
+## quantification pipeline
+## hisat2 as aligner to align reads to transcriptome
+## rsem will estimate the expression levels for both gene/isoform
+## output: in genes.results and isoform.results. 
+## in current pipeline, RSEM will only output MLE results. 
+## 
 workflow RunHisat2RsemPipeline {
   File fastq_read1
   File fastq_read2
