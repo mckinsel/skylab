@@ -2,7 +2,7 @@ task CollectMultipleMetrics {
   File aligned_bam
   File ref_genome_fasta
   String output_filename
-  
+  Float disk_size 
   command {
     java -Xmx6g -jar /usr/picard/picard.jar CollectMultipleMetrics \
       VALIDATION_STRINGENCY=SILENT \
@@ -25,7 +25,7 @@ task CollectMultipleMetrics {
   runtime {
     docker:"quay.io/humancellatlas/secondary-analysis-picard:2.10.10-7ab16db"
     memory:"7.5 GB"
-    disks: "local-disk 50 HDD"
+    disks: "local-disk " + sub(disk_size, "\\..*", "") + " HDD"
   }
   output {
     File alignment_summary_metrics = "${output_filename}.alignment_summary_metrics.txt"
@@ -54,6 +54,7 @@ task CollectRnaMetrics {
   File rrna_interval
   String output_filename
   String stranded
+  Float disk_size
   command{
     java -Xmx3g -jar /usr/picard/picard.jar CollectRnaSeqMetrics \
       VALIDATION_STRINGENCY=SILENT \
@@ -68,7 +69,7 @@ task CollectRnaMetrics {
   runtime {
     docker:"quay.io/humancellatlas/secondary-analysis-picard:2.10.10-7ab16db"
     memory:"3.75 GB"
-    disks: "local-disk 10 HDD"
+    disks: "local-disk " + sub(disk_size, "\\..*", "") + " HDD"
   }
   output {
     File rna_metrics = "${output_filename}.rna_metrics.txt"
@@ -80,7 +81,7 @@ task CollectRnaMetrics {
 task CollectDuplicationMetrics {
   File aligned_bam
   String output_filename
-
+  Float disk_size
   command {
     java -Xmx6g -XX:ParallelGCThreads=2  -jar /usr/picard/picard.jar  MarkDuplicates \
        VALIDATION_STRINGENCY=SILENT  \
@@ -94,7 +95,7 @@ task CollectDuplicationMetrics {
     docker: "quay.io/humancellatlas/secondary-analysis-picard:2.10.10-7ab16db"
     memory: "7.5 GB"
     cpu: "2"
-    disks: "local-disk 50 HDD"
+    disks: "local-disk " + sub(disk_size, "\\..*", "") + " HDD"
   }
   output {
     File dedup_metrics = "${output_filename}.duplicate_metrics.txt"

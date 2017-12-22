@@ -10,7 +10,10 @@ task HISAT2PE {
   String ref_name
   String output_name
   String sample_name
+  Float disk_size
   command {
+    set -e
+    
     tar -zxvf "${hisat2_ref}"
     hisat2 -t \
       -x ${ref_name}/${ref_name} \
@@ -29,7 +32,7 @@ task HISAT2PE {
   runtime {
     docker:"quay.io/humancellatlas/secondary-analysis-hisat2:2-2.1.0"
     memory:"5 GB"
-    disks: "local-disk 100 HDD"
+    disks: "local-disk " + sub(disk_size, "\\..*", "") + " HDD"
     cpu: "4"
   }
   output {
@@ -53,7 +56,10 @@ task HISAT2rsem {
   String ref_name
   String output_name
   String sample_name
+  Float disk_size
   command {
+    set -e
+    
     tar -zxvf "${hisat2_ref}" 
     hisat2 -t \
       -x ${ref_name}/${ref_name} \
@@ -81,7 +87,7 @@ task HISAT2rsem {
   runtime {
     docker:"quay.io/humancellatlas/secondary-analysis-hisat2:2-2.1.0"
     memory:"5 GB"
-    disks: "local-disk 50 HDD"
+    disks: "local-disk " + sub(disk_size, "\\..*", "") + " HDD"
     cpu: "4"
   }
   output {
@@ -97,7 +103,10 @@ task HISAT2SE {
   String ref_name
   String output_name
   String sample_name
+  Float disk_size
   command {
+    set -e
+    
     tar -zxvf "${hisat2_ref}"
     hisat2 -t \
       -x ${ref_name}/${ref_name} \
@@ -108,12 +117,12 @@ task HISAT2SE {
       --met-file ${output_name}.hisat2.met.txt --met 5 \
       --seed 12345 \
       -p 4 -S ${output_name}.sam
-      samtools sort -@ 4 -O bam -o "${output_name}.bam" "${output_name}.sam"
+    samtools sort -@ 4 -O bam -o "${output_name}.bam" "${output_name}.sam"
   }
   runtime {
     docker:"quay.io/humancellatlas/secondary-analysis-hisat2:2-2.1.0"
     memory:"5 GB"
-    disks: "local-disk 25 HDD"
+    disks: "local-disk " + sub(disk_size, "\\..*", "") + " HDD"
     cpu: "4"
   }
   output {
@@ -126,8 +135,9 @@ task HISAT2SE {
 task hisat2_inspect_index {
   File hisat2_ref
   String ref_name
-
+  Float disk_size
   command {
+    set -e
     tar -zxvf "${hisat2_ref}"
     hisat2-inspect --ss --snp \
        -s ${ref_name}/${ref_name} > hisat2_inspect.log
@@ -135,7 +145,7 @@ task hisat2_inspect_index {
   runtime {
     docker:"quay.io/humancellatlas/secondary-analysis-hisat2:2-2.1.0"
     memory:"3 GB"
-    disks: "local-disk 25 HDD"
+    disks: "local-disk " + sub(disk_size, "\\..*", "") + " HDD"
     cpu: "1"
   }
   output {

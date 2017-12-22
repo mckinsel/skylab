@@ -7,7 +7,7 @@ import "hisat2_rsem_pipeline.wdl" as run_hisat2_rsem
 workflow run_pipeline {
 
   # load annotation
-  File gtffile
+  File gtf_file
   File genome_ref_fasta
   File rrna_intervals
   File gene_ref_flat
@@ -25,12 +25,11 @@ workflow run_pipeline {
   String output_name
   File fastq1
   File fastq2
-  
   call run_hisat2.RunHisat2Pipeline {
     input:
       fastq_read1 = fastq1,
       fastq_read2 = fastq2, 
-      gtf = gtffile,
+      gtf = gtf_file,
       stranded = stranded,
       ref_fasta = genome_ref_fasta,
       rrna_interval = rrna_intervals,
@@ -39,6 +38,7 @@ workflow run_pipeline {
       hisat2_ref_name = hisat2_ref_name,
       sample_name = sample_name,
       output_prefix = output_name
+      
   }
   call run_hisat2_rsem.RunHisat2RsemPipeline {
     input:

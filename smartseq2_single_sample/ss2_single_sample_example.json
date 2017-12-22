@@ -1,5 +1,5 @@
 {
-  "run_pipeline.gtffile": "gs://broad-dsde-mint-dev-teststorage/reference/GRCh38_Gencode/gencode.v27.primary_assembly.annotation.gtf",
+  "run_pipeline.gtf_file": "gs://broad-dsde-mint-dev-teststorage/reference/GRCh38_Gencode/gencode.v27.primary_assembly.annotation.gtf",
   "run_pipeline.hisat2_ref_trans_name": "gencode_v27_trans_rsem",
   "run_pipeline.rrna_intervals": "gs://broad-dsde-mint-dev-teststorage/reference/gencode.v27.rRNA.interval_list",
   "run_pipeline.star_ref_index": "gs://broad-dsde-mint-dev-teststorage/reference/GRCh38_Gencode/GRCh38_GencodeV27_Primary.tar",

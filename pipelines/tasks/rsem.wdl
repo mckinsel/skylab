@@ -9,10 +9,11 @@ task RsemExpression {
   File trans_aligned_bam
   File rsem_genome
   String rsem_out
-  
+  Float disk_size
   command {
+    set -e
+  
     tar -xvf ${rsem_genome}
-    echo "Aligning fastqs and calculating expression"
     rsem-calculate-expression \
       --bam \
       --paired-end \
@@ -25,7 +26,7 @@ task RsemExpression {
   runtime {
     docker: "quay.io/humancellatlas/secondary-analysis-rsem:1.3.0"
     memory: "3.75 GB"
-    disks: "local-disk 50 HDD"
+    disks: "local-disk " + sub(disk_size, "\\..*", "") + " HDD"
     cpu: "4"
   }
   output {

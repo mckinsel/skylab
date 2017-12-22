@@ -14,6 +14,14 @@ workflow RunHisat2RsemPipeline {
   String output_prefix
   String hisat2_ref_trans_name
   String sample_name
+  ##variable to estimate disk size
+  ## variables to estimate disk size
+  Float hisat2_ref_size = size(hisat2_ref_trans,"GB")
+  Float fastq_size = size(fastq_read1,"GB") +size(fastq_read2,"GB")
+  Float rsem_ref_size = size(rsem_genome,"GB")
+  Float md_disk_multiplier = 3.25
+  Int? increase_disk_size
+  Int additional_disk = select_first([increase_disk_size, 10])
   
   call hisat2.HISAT2rsem as Hisat2Trans {
     input:
@@ -22,13 +30,17 @@ workflow RunHisat2RsemPipeline {
       fq2 = fastq_read2,
       ref_name = hisat2_ref_trans_name,
       sample_name = sample_name,
-      output_name = output_prefix
+      output_name = output_prefix,
+      disk_size = fastq_size*md_disk_multiplier+hisat2_ref_size+additional_disk
+      
     }
+  Float bam_size = size(Hisat2Trans.output_bam,"GB")
   call rsem.RsemExpression as Rsem {
     input:
       trans_aligned_bam = Hisat2Trans.output_bam,
       rsem_genome = rsem_genome,
-      rsem_out = output_prefix
+      rsem_out = output_prefix,
+      disk_size = fastq_size*md_disk_multiplier+rsem_ref_size+additional_disk
     }
   output {
     File aligned_trans_bam = Hisat2Trans.output_bam

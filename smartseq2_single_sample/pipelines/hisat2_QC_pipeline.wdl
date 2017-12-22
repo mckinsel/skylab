@@ -15,7 +15,14 @@ workflow RunHisat2Pipeline {
   String output_prefix
   String hisat2_ref_name
   String sample_name
-  
+  ## variables to estimate disk size
+  Float hisat2_ref_size = size(hisat2_ref,"GB")
+  Float fastq_size = size(fastq_read1,"GB") +size(fastq_read2,"GB")
+  Float reference_bundle_size = size(ref_fasta,"GB") + size(ref_flat,"GB")+size(rrna_interval,"GB")+size(gtf,"GB")
+  Float md_disk_multiplier = 5.0
+  Int? increase_disk_size
+  Int additional_disk = select_first([increase_disk_size, 10])
+ 
   call hisat2.HISAT2PE as Hisat2 {
     input:
       hisat2_ref = hisat2_ref,
@@ -23,13 +30,18 @@ workflow RunHisat2Pipeline {
       fq2 = fastq_read2,
       ref_name = hisat2_ref_name,
       sample_name = sample_name,
-      output_name = output_prefix
+      output_name = output_prefix,
+      disk_size = hisat2_ref_size+fastq_size*md_disk_multiplier+additional_disk*1.5
   }
+  
+  Float bam_size = size(Hisat2.output_bam,"GB")
+  
   call picard.CollectMultipleMetrics {
     input:
       aligned_bam = Hisat2.output_bam,
       ref_genome_fasta = ref_fasta,
-      output_filename = output_prefix
+      output_filename = output_prefix,
+      disk_size = bam_size+reference_bundle_size+additional_disk
   }
   call picard.CollectRnaMetrics {
     input:
@@ -37,12 +49,14 @@ workflow RunHisat2Pipeline {
       ref_flat = ref_flat,
       rrna_interval = rrna_interval,
       output_filename = output_prefix,
-      stranded = stranded
+      stranded = stranded,
+      disk_size = bam_size+reference_bundle_size+additional_disk
   }
   call picard.CollectDuplicationMetrics {
     input:
       aligned_bam = Hisat2.output_bam,
-      output_filename = output_prefix
+      output_filename = output_prefix,
+      disk_size = (md_disk_multiplier * bam_size) + additional_disk,
   }
 
   output {
