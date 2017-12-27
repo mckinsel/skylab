@@ -21,7 +21,7 @@ workflow RunHisat2RsemPipeline {
   Float rsem_ref_size = size(rsem_genome,"GB")
   Float md_disk_multiplier = 10.0
   Int? increase_disk_size
-  Int additional_disk = select_first([increase_disk_size, 50])
+  Int additional_disk = select_first([increase_disk_size, 10])
   
   call hisat2.HISAT2rsem as Hisat2Trans {
     input:
@@ -31,7 +31,7 @@ workflow RunHisat2RsemPipeline {
       ref_name = hisat2_ref_trans_name,
       sample_name = sample_name,
       output_name = output_prefix,
-      disk_size = fastq_size*md_disk_multiplier+hisat2_ref_size+additional_disk
+      disk_size = fastq_size*md_disk_multiplier+hisat2_ref_size+additional_disk*5.0
       
     }
   Float bam_size = size(Hisat2Trans.output_bam,"GB")
