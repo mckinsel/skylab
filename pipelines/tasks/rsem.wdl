@@ -33,6 +33,7 @@ task RsemExpression {
     memory: "3.75 GB"
     disks: "local-disk " + sub(disk_size, "\\..*", "") + " HDD"
     cpu: "4"
+    preemptible: 1
   }
   output {
     File rsem_gene = "${rsem_out}.genes.results"

@@ -26,6 +26,7 @@ task CollectMultipleMetrics {
     docker:"quay.io/humancellatlas/secondary-analysis-picard:2.10.10-7ab16db"
     memory:"7.5 GB"
     disks: "local-disk " + sub(disk_size, "\\..*", "") + " HDD"
+    preemptible: 1
   }
   output {
     File alignment_summary_metrics = "${output_filename}.alignment_summary_metrics.txt"
@@ -70,6 +71,7 @@ task CollectRnaMetrics {
     docker:"quay.io/humancellatlas/secondary-analysis-picard:2.10.10-7ab16db"
     memory:"3.75 GB"
     disks: "local-disk " + sub(disk_size, "\\..*", "") + " HDD"
+    preemptible: 1
   }
   output {
     File rna_metrics = "${output_filename}.rna_metrics.txt"
@@ -96,6 +98,7 @@ task CollectDuplicationMetrics {
     memory: "7.5 GB"
     cpu: "2"
     disks: "local-disk " + sub(disk_size, "\\..*", "") + " HDD"
+    preemptible: 1
   }
   output {
     File dedup_metrics = "${output_filename}.duplicate_metrics.txt"

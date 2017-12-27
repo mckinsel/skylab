@@ -19,7 +19,7 @@ workflow RunHisat2Pipeline {
   Float hisat2_ref_size = size(hisat2_ref,"GB")
   Float fastq_size = size(fastq_read1,"GB") +size(fastq_read2,"GB")
   Float reference_bundle_size = size(ref_fasta,"GB") + size(ref_flat,"GB")+size(rrna_interval,"GB")+size(gtf,"GB")
-  Float md_disk_multiplier = 5.0
+  Float md_disk_multiplier = 10.0
   Int? increase_disk_size
   Int additional_disk = select_first([increase_disk_size, 10])
  
@@ -31,7 +31,7 @@ workflow RunHisat2Pipeline {
       ref_name = hisat2_ref_name,
       sample_name = sample_name,
       output_name = output_prefix,
-      disk_size = hisat2_ref_size+fastq_size*md_disk_multiplier+additional_disk*1.5
+      disk_size = hisat2_ref_size+fastq_size*md_disk_multiplier+additional_disk*5.0
   }
   
   Float bam_size = size(Hisat2.output_bam,"GB")

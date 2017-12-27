@@ -25,6 +25,7 @@ workflow run_pipeline {
   String output_name
   File fastq1
   File fastq2
+  
   call run_hisat2.RunHisat2Pipeline {
     input:
       fastq_read1 = fastq1,
@@ -38,7 +39,6 @@ workflow run_pipeline {
       hisat2_ref_name = hisat2_ref_name,
       sample_name = sample_name,
       output_prefix = output_name
-      
   }
   call run_hisat2_rsem.RunHisat2RsemPipeline {
     input:

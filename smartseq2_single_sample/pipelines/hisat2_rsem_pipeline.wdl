@@ -19,9 +19,9 @@ workflow RunHisat2RsemPipeline {
   Float hisat2_ref_size = size(hisat2_ref_trans,"GB")
   Float fastq_size = size(fastq_read1,"GB") +size(fastq_read2,"GB")
   Float rsem_ref_size = size(rsem_genome,"GB")
-  Float md_disk_multiplier = 3.25
+  Float md_disk_multiplier = 10.0
   Int? increase_disk_size
-  Int additional_disk = select_first([increase_disk_size, 10])
+  Int additional_disk = select_first([increase_disk_size, 50])
   
   call hisat2.HISAT2rsem as Hisat2Trans {
     input:

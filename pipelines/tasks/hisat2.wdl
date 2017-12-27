@@ -34,6 +34,7 @@ task HISAT2PE {
     memory:"5 GB"
     disks: "local-disk " + sub(disk_size, "\\..*", "") + " HDD"
     cpu: "4"
+    preemptible: 1
   }
   output {
     File logfile = "${output_name}.log"
@@ -89,6 +90,7 @@ task HISAT2rsem {
     memory:"5 GB"
     disks: "local-disk " + sub(disk_size, "\\..*", "") + " HDD"
     cpu: "4"
+    preemptible: 1
   }
   output {
     File logfile = "${output_name}.log"
@@ -124,6 +126,7 @@ task HISAT2SE {
     memory:"5 GB"
     disks: "local-disk " + sub(disk_size, "\\..*", "") + " HDD"
     cpu: "4"
+    preemptible: 1
   }
   output {
     File logfile ="${output_name}.log"
