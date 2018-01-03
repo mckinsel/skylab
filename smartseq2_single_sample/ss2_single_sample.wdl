@@ -56,37 +56,37 @@ workflow SmartSeq2SingleCell {
 
   output {
     # data workflow outputs
-    File aligned_trans_bam = data.output_bam
-    File data_metfile = data.metfile
-    File data_logfile = data.logfile
-    File rsem_gene_results = data.rsem_gene
-    File rsem_isoform_results = data.rsem_isoform
-    File rsem_time_log = data.rsem_time
-    File rsem_cnt_log = data.rsem_cnt
-    File rsem_model_log = data.rsem_model
-    File rsem_theta_log = data.rsem_theta
+    File aligned_trans_bam = data.aligned_trans_bam
+    File hisat2tran_logfile = data.logfile
+    File hisat2tran_metfile = data.metfile
+    File rsem_cnt_log = data.rsem_cnt_log
+    File rsem_gene_results = data.rsem_gene_results
+    File rsem_isoform_results = data.rsem_isoform_results
+    File rsem_model_log = data.rsem_model_log
+    File rsem_theta_log = data.rsem_theta_log
+    File rsem_time_log = data.rsem_time_log
     # qc workflow outputs
-    File aligned_bam = qc.output_bam
-    File qc_metfile = qc.metfile
-    File qc_logfile = qc.logfile
+    File aligned_bam = qc.aligned_bam
     File alignment_summary_metrics = qc.alignment_summary_metrics
+    File bait_bias_detail_metrics = qc.bait_bias_detail_metrics
+    File bait_bias_summary_metrics = qc.bait_bias_summary_metrics
     File base_call_dist_metrics = qc.base_call_dist_metrics
     File base_call_pdf = qc.base_call_pdf
+    File dedup_metrics = qc.dedup_metrics
+    File error_summary_metrics = qc.error_summary_metrics
     File gc_bias_detail_metrics = qc.gc_bias_detail_metrics
     File gc_bias_dist_pdf = qc.gc_bias_dist_pdf
     File gc_bias_summary_metrics = qc.gc_bias_summary_metrics
     File insert_size_hist = qc.insert_size_hist
     File insert_size_metrics = qc.insert_size_metrics
-    File quality_distribution_metrics = qc.quality_distribution_metrics
-    File quality_distribution_dist_pdf = qc.quality_distribution_dist_pdf
+    File hisat2_logfile = qc.logfile
+    File hisat2_metfile = qc.metfile
+    File pre_adapter_details_metrics = qc.pre_adapter_details_metrics
     File quality_by_cycle_metrics = qc.quality_by_cycle_metrics
     File quality_by_cycle_pdf = qc.quality_by_cycle_pdf
-    File pre_adapter_details_metrics = qc.pre_adapter_details_metrics
-    File bait_bias_detail_metrics = qc.bait_bias_detail_metrics
-    File bait_bias_summary_metrics = qc.bait_bias_summary_metrics
-    File error_summary_metrics = qc.error_summary_metrics
+    File quality_distribution_dist_pdf = qc.quality_distribution_dist_pdf
+    File quality_distribution_metrics = qc.quality_distribution_metrics
+    File rna_coverage = qc.rna_coverage
     File rna_metrics = qc.rna_metrics
-    File rna_coverage = qc.rna_coverage_pdf
-    File dedup_metrics = qc.dedup_metrics
-  }
+    }
 }
