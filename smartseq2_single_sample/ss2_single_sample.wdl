@@ -57,8 +57,8 @@ workflow SmartSeq2SingleCell {
   output {
     # data workflow outputs
     File aligned_trans_bam = data.output_bam
-    File metfile = data.metfile
-    File logfile = data.logfile
+    File data_metfile = data.metfile
+    File data_logfile = data.logfile
     File rsem_gene_results = data.rsem_gene
     File rsem_isoform_results = data.rsem_isoform
     File rsem_time_log = data.rsem_time
@@ -67,8 +67,8 @@ workflow SmartSeq2SingleCell {
     File rsem_theta_log = data.rsem_theta
     # qc workflow outputs
     File aligned_bam = qc.output_bam
-    File metfile = qc.metfile
-    File logfile = qc.logfile
+    File qc_metfile = qc.metfile
+    File qc_logfile = qc.logfile
     File alignment_summary_metrics = qc.alignment_summary_metrics
     File base_call_dist_metrics = qc.base_call_dist_metrics
     File base_call_pdf = qc.base_call_pdf
