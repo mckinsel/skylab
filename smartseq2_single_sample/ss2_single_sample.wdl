@@ -27,7 +27,7 @@ workflow SmartSeq2SingleCell {
   File fastq1
   File fastq2
 
-  call run_hisat2.RunHisat2Pipeline as data {
+  call run_hisat2.RunHisat2Pipeline as qc {
     input:
       fastq_read1 = fastq1,
       fastq_read2 = fastq2, 
@@ -43,7 +43,7 @@ workflow SmartSeq2SingleCell {
       
   }
 
-  call run_hisat2_rsem.RunHisat2RsemPipeline as qc {
+  call run_hisat2_rsem.RunHisat2RsemPipeline as data {
     input:
       fastq_read1 = fastq1, 
       fastq_read2 = fastq2, 
