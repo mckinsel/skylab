@@ -35,7 +35,6 @@ workflow RunHisat2RsemPipeline {
       disk_size = ceil(fastq_size * bam_disk_multiplier + hisat2_ref_size + additional_disk * 5.0)
       
     }
-  Float bam_size = size(Hisat2Trans.output_bam, "GB")
   call rsem.RsemExpression as Rsem {
     input:
       trans_aligned_bam = Hisat2Trans.output_bam,
