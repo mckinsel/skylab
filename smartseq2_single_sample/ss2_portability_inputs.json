@@ -1,0 +1,17 @@
+{
+  "SS2PortabilityWorkflow.gtf_file": "https://s3.amazonaws.com/mk-hca-portability-data/new_ss2/gencode.v27.primary_assembly.annotation.gtf",
+  "SS2PortabilityWorkflow.hisat2_ref_trans_name": "gencode_v27_trans_rsem",
+  "SS2PortabilityWorkflow.rrna_intervals": "https://s3.amazonaws.com/mk-hca-portability-data/new_ss2/gencode.v27.rRNA.interval_list",
+  "SS2PortabilityWorkflow.hisat2_ref_index": "https://s3.amazonaws.com/mk-hca-portability-data/new_ss2/genome_snp_tran.tar.gz",
+  "SS2PortabilityWorkflow.genome_ref_fasta": "https://s3.amazonaws.com/mk-hca-portability-data/new_ss2/GRCh38.primary_assembly.genome.fa",
+  "SS2PortabilityWorkflow.hisat2_ref_trans_index": "https://s3.amazonaws.com/mk-hca-portability-data/new_ss2/gencode_v27_trans_rsem.tar.gz",
+  "SS2PortabilityWorkflow.rsem_ref_index": "https://s3.amazonaws.com/mk-hca-portability-data/new_ss2/gencode_v27_primary.tar",
+  "SS2PortabilityWorkflow.gene_ref_flat": "https://s3.amazonaws.com/mk-hca-portability-data/new_ss2/GRCh38_gencode.v27.refFlat.txt",
+  "SS2PortabilityWorkflow.hisat2_ref_name": "genome_snp_tran",
+  "SS2PortabilityWorkflow.stranded":"NONE",
+  "SS2PortabilityWorkflow.fastq1":"https://s3.amazonaws.com/mk-hca-portability-data/new_ss2/SRR1294925_1.fastq.gz",
+  "SS2PortabilityWorkflow.fastq2":"https://s3.amazonaws.com/mk-hca-portability-data/new_ss2/SRR1294925_2.fastq.gz",
+  "SS2PortabilityWorkflow.sample_name":"SRR1294925",
+  "SS2PortabilityWorkflow.output_name":"SRR1294925",
+  "SS2PortabilityWorkflow.expected_rna_metrics_hash": "114690ff07a8415172e06f4a9ad1a391"
+}

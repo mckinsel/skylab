@@ -1,0 +1,11 @@
+language: python
+sudo: required
+python:
+- '3.5'
+script:
+- pip install -U pip
+- pip install -U -I requests
+- python test/portability_tests.py --portability_tests_json test/portability_tests.json
+env:
+  global:
+    secure: dzt6nrLCjXzxZFKL/cKCqxqT2kGmfILMjB2P0TLsbWKoq3yfIbwiAw81QpG9sehHAGIDsLg8y56tc57nbfZmsZQ68W+RJGtJcaOJh6KEd4L3WWhqXCuIEHt2sI+aVZWGdfMQclpoIBFd2oX9phSB/kNoUQvmUBczoYCGNJP/+LmP2DVmtfSk2vl0QtURIE30flGSXqPzbgy2dOFzFk9kEyuKOxKR4KXi42U84idt1pEfXjkf3F3vST3/BbEe7qDBGvNZo6EHjCXqDHcK0hDzQQychdas5Tp3NbMifN6XTX8CC8ZB2NxAc0CIdtbPgkC5OMUNgXNfSQ8erYRO3NP5HkNjChlufhjdnpqg5VZZnn15VbsZvdHAQcxZCk8XULbl3LlRy8OPjyjJ1dXpPnqdMb2jfUkN66gdghwijC+9/7K45klwXKJAdraUy5p3pDDLDque8mR+gW98BDvrOlRKqQ70gvG8WphuCEDxYjaaNXRngY0iklcKplCdJ5f7maWmANooexZ0Tq/iMr8LbsI3f8aE97sxMlDXywKe9iwAJRn6QDkj0e4QUzsz2nSHFwcmNA0n9AxUGcf8T3MqexTWJSFNuyK9MQqlmeul7NhbQopTWeQU3JN+EJhGf2sZXUqVij2cGbOTCJLz3sKSlBn/qG6g80jzEJp520B9qzWLvYA=

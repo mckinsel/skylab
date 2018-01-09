@@ -1,0 +1,22 @@
+{
+    "portability_service_url": "https://hca-portability.czi.technology/api",
+    "portability_service_headers": [
+        ["X_API_KEY", "X-API-KEY"]
+    ],
+    "portability_tests": [
+        {
+            "name": "SmartSeq2",
+            "portability_wdl": "smartseq2_single_sample/ss2_portability.wdl",
+            "dependency_wdls": [
+                "smartseq2_single_sample/pipelines/hisat2_QC_pipeline.wdl",
+                "smartseq2_single_sample/pipelines/hisat2_rsem_pipeline.wdl",
+                "pipelines/tasks/hisat2.wdl",
+                "pipelines/tasks/picard.wdl",
+                "pipelines/tasks/rsem.wdl",
+                "smartseq2_single_sample/ss2_checker.wdl",
+                "smartseq2_single_sample/ss2_single_sample.wdl"
+            ],
+            "portability_inputs": "smartseq2_single_sample/ss2_portability_inputs.json"
+        }
+    ]
+}
