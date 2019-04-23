@@ -2,18 +2,20 @@ import "Optimus.wdl" as target
 import "ValidateOptimus.wdl" as checker
 
 
-# this task will be run by the jenkins script that gets executed on our PRs.
-
+# this workflow will be run by the jenkins script that gets executed by PRs.
 workflow TestOptimusPR {
 
   # output hashes
   String expected_bam_hash
   String expected_matrix_hash
-  String expected_matrix_summary_hash
-  String expected_picard_metrics_hash
+  String expected_gene_metric_hash
+  String expected_cell_metric_hash
 
   # Optimus inputs
-  Array[Array[File]] fastq_inputs  # array of arrays of matched fastqs [ [r1, r2, i1], ... ]
+  Array[File] r1_fastq
+  Array[File] r2_fastq
+  Array[File]? i1_fastq
+
   File whitelist  # 10x genomics cell barcode whitelist for 10x V2
   File tar_star_reference  # star reference
   File annotations_gtf  # gtf containing annotations for gene tagging
@@ -22,7 +24,9 @@ workflow TestOptimusPR {
 
   call target.Optimus as target {
     input:
-      fastq_inputs = fastq_inputs,
+      r1_fastq = r1_fastq,
+      r2_fastq = r2_fastq,
+      i1_fastq = i1_fastq,
       whitelist = whitelist,
       tar_star_reference = tar_star_reference,
       annotations_gtf = annotations_gtf,
@@ -34,12 +38,12 @@ workflow TestOptimusPR {
     input:
       bam = target.bam,
       matrix = target.matrix,
-      matrix_summary = target.matrix_summary,
-      picard_metrics = target.picard_metrics,
+      gene_metrics = target.gene_metrics,
+      cell_metrics = target.cell_metrics,
       expected_bam_hash = expected_bam_hash,
       expected_matrix_hash = expected_matrix_hash,
-      expected_matrix_summary_hash = expected_matrix_summary_hash,
-      expected_picard_metrics_hash = expected_picard_metrics_hash
+      expected_cell_metric_hash = expected_cell_metric_hash,
+      expected_gene_metric_hash = expected_gene_metric_hash
   }
 
 }

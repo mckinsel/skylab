@@ -24,7 +24,9 @@ CROMWELL_URL="https://cromwell.mint-dev.broadinstitute.org"
 echo "Running test"
 docker run --rm \
   -v ${WD}:/working \
-  humancellatlas/cromwell-tools:1.0.1 \
+  -w /working \
+  --privileged \
+  quay.io/broadinstitute/cromwell-tools:v1.1.1 \
   /working/test/test_cromwell_workflow.sh \
     "${CROMWELL_USER}" \
     "${CROMWELL_PASSWORD}" \

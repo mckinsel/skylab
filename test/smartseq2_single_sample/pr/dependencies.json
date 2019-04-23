@@ -1,9 +1,9 @@
 {
-  "ss2_single_sample.wdl": "/working/smartseq2_single_sample/ss2_single_sample.wdl",
-  "ValidateSmartSeq2SingleCell.wdl": "/working/test/smartseq2_single_sample/pr/ValidateSmartSeq2SingleCell.wdl",
-  "hisat2_QC_pipeline.wdl": "/working/smartseq2_single_sample/pipelines/hisat2_QC_pipeline.wdl",
-  "hisat2_rsem_pipeline.wdl": "/working/smartseq2_single_sample/pipelines/hisat2_rsem_pipeline.wdl",
-  "hisat2.wdl": "/working/pipelines/tasks/hisat2.wdl",
-  "picard.wdl": "/working/pipelines/tasks/picard.wdl",
-  "rsem.wdl": "/working/pipelines/tasks/rsem.wdl"
+  "SmartSeq2SingleSample.wdl": "pipelines/smartseq2_single_sample/SmartSeq2SingleSample.wdl",
+  "ValidateSmartSeq2SingleCell.wdl": "test/smartseq2_single_sample/pr/ValidateSmartSeq2SingleCell.wdl",
+  "HISAT2.wdl": "library/tasks/HISAT2.wdl",
+  "Picard.wdl": "library/tasks/Picard.wdl",
+  "RSEM.wdl": "library/tasks/RSEM.wdl",
+  "GroupMetricsOutputs.wdl": "library/tasks/GroupMetricsOutputs.wdl",
+  "ZarrUtils.wdl": "library/tasks/ZarrUtils.wdl"
 }
